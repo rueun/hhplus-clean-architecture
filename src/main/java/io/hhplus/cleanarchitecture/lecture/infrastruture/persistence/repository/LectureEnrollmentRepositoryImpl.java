@@ -13,24 +13,24 @@ import java.util.List;
 @Repository
 public class LectureEnrollmentRepositoryImpl implements LectureEnrollmentRepository {
 
-    private final EnrollmentJpaRepository enrollmentJpaRepository;
+    private final LectureEnrollmentJpaRepository lectureEnrollmentJpaRepository;
 
     @Override
     public LectureEnrollment save(final LectureEnrollment enrollment) {
-        final LectureEnrollmentJpaEntity jpaEntity = enrollmentJpaRepository.save(LectureEnrollmentMapper.toJpaEntity(enrollment));
+        final LectureEnrollmentJpaEntity jpaEntity = lectureEnrollmentJpaRepository.save(LectureEnrollmentMapper.toJpaEntity(enrollment));
         return LectureEnrollmentMapper.toDomain(jpaEntity);
     }
 
     @Override
     public List<LectureEnrollment> findAllByUserId(final Long userId) {
-        final List<LectureEnrollmentJpaEntity> jpaEntities = enrollmentJpaRepository.findAllByUserId(userId);
+        final List<LectureEnrollmentJpaEntity> jpaEntities = lectureEnrollmentJpaRepository.findAllByUserId(userId);
         return jpaEntities.stream()
                 .map(LectureEnrollmentMapper::toDomain).toList();
     }
 
     @Override
     public boolean existsByLectureIdAndUserId(final Long lectureId, final Long userId) {
-        return enrollmentJpaRepository.findAllByLectureId(lectureId)
+        return lectureEnrollmentJpaRepository.findAllByLectureId(lectureId)
                 .stream()
                 .anyMatch(lectureEnrollmentJpaEntity -> lectureEnrollmentJpaEntity.getUserId().equals(userId));
     }
