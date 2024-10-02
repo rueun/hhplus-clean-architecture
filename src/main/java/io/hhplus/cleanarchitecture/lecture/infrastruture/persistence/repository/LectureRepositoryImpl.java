@@ -69,6 +69,13 @@ public class LectureRepositoryImpl implements LectureRepository {
         return LectureItemMapper.toDomain(jpaEntity);
     }
 
+    @Override
+    public LectureItem getItemByIdWithPessimisticLock(final Long lectureId, final Long lectureItemId) {
+        LectureItemJpaEntity jpaEntity = lectureItemJpaRepository.findByIdWithPessimisticLock(lectureId, lectureItemId)
+                .orElseThrow(() -> new LectureItemNotFoundException("해당 강의 아이템을 찾을 수 없습니다."));
+        return LectureItemMapper.toDomain(jpaEntity);
+    }
+
 
     @Override
     public Map<Long, List<LectureItem>> getLectureItemMap(final List<Long> lectureIds) {

@@ -13,6 +13,7 @@ public interface LectureRepository {
     Lecture getById(Long lectureId);
     List<Lecture> getByIds(List<Long> lectureIds);
     LectureItem getItemById(Long lectureId, Long lectureItemId);
+    LectureItem getItemByIdWithPessimisticLock(Long lectureId, Long lectureItemId);
     Map<Long, List<LectureItem>> getLectureItemMap(List<Long> lectureIds);
     List<Lecture> getAvailableLectures(Long userId);
 }

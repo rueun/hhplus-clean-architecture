@@ -23,4 +23,12 @@ public interface LectureEnrollmentJpaRepository extends JpaRepository<LectureEnr
                 WHERE e.userId = :userId
             """)
     List<LectureEnrollmentJpaEntity> findAllByUserId(@Param("userId") final Long userId);
+
+
+    @Query("""
+                SELECT e
+                FROM LectureEnrollmentJpaEntity e
+                WHERE e.lectureItemId = :lectureItemId
+            """)
+    List<LectureEnrollmentJpaEntity> findAllByLectureItemId(@Param("lectureItemId") final Long lectureItemId);
 }

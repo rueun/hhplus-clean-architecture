@@ -36,8 +36,7 @@ public class LectureService {
     public LectureEnrollment enroll(final EnrollLectureCommand command) {
         LocalDateTime enrolledAt = timeProvider.now();
 
-        // TODO: 2024-10-02 동시성 제어를 위해 Pessimistic Locking을 사용해야 함
-        final LectureItem lectureItem = lectureRepository.getItemById(command.getLectureId(), command.getLectureItemId());
+        final LectureItem lectureItem = lectureRepository.getItemByIdWithPessimisticLock(command.getLectureId(), command.getLectureItemId());
         lectureItem.enroll(enrolledAt);
 
         final LectureEnrollment enrollment = LectureEnrollment.of(command.getLectureId(), command.getLectureItemId(), command.getUserId(), enrolledAt);
