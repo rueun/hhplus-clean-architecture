@@ -4,6 +4,7 @@ import io.hhplus.cleanarchitecture.common.time.FakeTimeProvider;
 import io.hhplus.cleanarchitecture.common.time.TimeProvider;
 import io.hhplus.cleanarchitecture.lecture.application.dto.command.EnrollLectureCommand;
 import io.hhplus.cleanarchitecture.lecture.domain.entity.Lecture;
+import io.hhplus.cleanarchitecture.lecture.domain.entity.LectureEnrollment;
 import io.hhplus.cleanarchitecture.lecture.domain.entity.LectureItem;
 import io.hhplus.cleanarchitecture.lecture.domain.repository.LectureEnrollmentRepository;
 import io.hhplus.cleanarchitecture.lecture.domain.repository.LectureRepository;
@@ -16,6 +17,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -47,7 +49,6 @@ class LectureServiceConcurrencyTest {
                 .title("강의")
                 .instructor("강사")
                 .build();
-
         final Lecture savedLecture = lectureRepository.save(lecture);
 
         LectureItem lectureItem = LectureItem.builder()
@@ -56,7 +57,6 @@ class LectureServiceConcurrencyTest {
                 .lectureId(savedLecture.getId())
                 .lectureTime(LocalDateTime.parse("2024-10-05T10:00"))
                 .build();
-
         final LectureItem savedLectureItem = lectureRepository.saveItem(lectureItem);
 
         // When
@@ -66,29 +66,31 @@ class LectureServiceConcurrencyTest {
         CountDownLatch countDownLatch = new CountDownLatch(threadCount);
 
         for (int i = 1; i <= threadCount; i++) {
-            try {
-                long finalI = i;
-                executorService.execute(() -> {
+            long finalI = i;
+            executorService.execute(() -> {
+                try {
                     lectureService.enroll(EnrollLectureCommand.builder()
                             .lectureId(savedLecture.getId())
                             .lectureItemId(savedLectureItem.getId())
                             .userId(finalI)
                             .build());
-                });
-            } catch (Exception e) {
-                failedCount.incrementAndGet();
-            } finally {
-                countDownLatch.countDown();
-            }
+                } catch (Exception e) {
+                    failedCount.incrementAndGet();
+                } finally {
+                    countDownLatch.countDown();
+                }
+            });
         }
         countDownLatch.await();
 
         // Then
         final LectureItem resultLectureItem = lectureRepository.getItemById(savedLecture.getId(), savedLectureItem.getId());
+        final List<LectureEnrollment> enrollmentsByLectureItemId = lectureEnrollmentRepository.findAllByLectureItemId(savedLectureItem.getId());
 
         assertAll(
                 () -> then(failedCount.get()).isEqualTo(10),
-                () -> then(resultLectureItem.getRemainingCapacity()).isEqualTo(0)
+                () -> then(resultLectureItem.getRemainingCapacity()).isEqualTo(0),
+                () -> then(enrollmentsByLectureItemId.size()).isEqualTo(30)
         );
     }
 
