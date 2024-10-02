@@ -2,6 +2,8 @@ package io.hhplus.cleanarchitecture.lecture.infrastruture.persistence.repository
 
 import io.hhplus.cleanarchitecture.lecture.domain.entity.Lecture;
 import io.hhplus.cleanarchitecture.lecture.domain.entity.LectureItem;
+import io.hhplus.cleanarchitecture.lecture.domain.exception.LectureItemNotFoundException;
+import io.hhplus.cleanarchitecture.lecture.domain.exception.LectureNotFoundException;
 import io.hhplus.cleanarchitecture.lecture.domain.repository.LectureRepository;
 import io.hhplus.cleanarchitecture.lecture.infrastruture.persistence.entity.LectureItemJpaEntity;
 import io.hhplus.cleanarchitecture.lecture.infrastruture.persistence.entity.LectureJpaEntity;
@@ -48,7 +50,7 @@ public class LectureRepositoryImpl implements LectureRepository {
     @Override
     public Lecture getById(final Long id) {
         LectureJpaEntity jpaEntity = lectureJpaRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 강의를 찾을 수 없습니다."));
+                .orElseThrow(() -> new LectureNotFoundException("해당 강의를 찾을 수 없습니다."));
         return LectureMapper.toDomain(jpaEntity);
     }
 
@@ -63,7 +65,7 @@ public class LectureRepositoryImpl implements LectureRepository {
     @Override
     public LectureItem getItemById(final Long lectureId, final Long lectureItemId) {
         LectureItemJpaEntity jpaEntity = lectureItemJpaRepository.findByLectureIdAndId(lectureId, lectureItemId)
-                .orElseThrow(() -> new IllegalArgumentException("해당 강의 아이템을 찾을 수 없습니다."));
+                .orElseThrow(() -> new LectureItemNotFoundException("해당 강의 아이템을 찾을 수 없습니다."));
         return LectureItemMapper.toDomain(jpaEntity);
     }
 

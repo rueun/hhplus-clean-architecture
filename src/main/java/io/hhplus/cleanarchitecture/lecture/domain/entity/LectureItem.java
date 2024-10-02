@@ -1,5 +1,7 @@
 package io.hhplus.cleanarchitecture.lecture.domain.entity;
 
+import io.hhplus.cleanarchitecture.lecture.domain.exception.LectureCapacityExceededException;
+import io.hhplus.cleanarchitecture.lecture.domain.exception.LectureEnrollmentClosedException;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,11 +25,11 @@ public class LectureItem {
 
     public void enroll(final LocalDateTime enrolledAt) {
         if (remainingCapacity == 0) {
-            throw new IllegalStateException("잔여 수량이 없습니다.");
+            throw new LectureCapacityExceededException("잔여 수량이 없습니다.");
         }
 
         if (lectureTime.isBefore(enrolledAt)) {
-            throw new IllegalStateException("수강 신청 시간이 지났습니다.");
+            throw new LectureEnrollmentClosedException("수강 신청 시간이 지났습니다.");
         }
 
         this.remainingCapacity--;

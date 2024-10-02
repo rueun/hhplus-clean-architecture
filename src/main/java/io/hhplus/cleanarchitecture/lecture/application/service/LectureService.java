@@ -7,6 +7,7 @@ import io.hhplus.cleanarchitecture.lecture.application.dto.command.EnrollLecture
 import io.hhplus.cleanarchitecture.lecture.domain.entity.Lecture;
 import io.hhplus.cleanarchitecture.lecture.domain.entity.LectureEnrollment;
 import io.hhplus.cleanarchitecture.lecture.domain.entity.LectureItem;
+import io.hhplus.cleanarchitecture.lecture.domain.exception.LectureAlreadyEnrolledException;
 import io.hhplus.cleanarchitecture.lecture.domain.repository.LectureEnrollmentRepository;
 import io.hhplus.cleanarchitecture.lecture.domain.repository.LectureRepository;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +30,7 @@ public class LectureService {
      * 특강 신청
      * @param command 특강 신청 Command 객체
      * @return 신청된 LectureEnrollment 객체
-     * @throws IllegalArgumentException 유저가 동일한 강의에 이미 수강신청한 경우
+     * @throws LectureAlreadyEnrolledException 유저가 동일한 강의에 이미 수강신청한 경우
      */
     @Transactional
     public LectureEnrollment enroll(final EnrollLectureCommand command) {
@@ -41,7 +42,7 @@ public class LectureService {
 
         final LectureEnrollment enrollment = LectureEnrollment.of(command.getLectureId(), command.getLectureItemId(), command.getUserId(), enrolledAt);
         if (lectureEnrollmentRepository.existsByLectureIdAndUserId(command.getLectureId(), command.getUserId())) {
-            throw new IllegalArgumentException("해당 유저는 이미 수강신청을 했습니다.");
+            throw new LectureAlreadyEnrolledException("해당 유저는 이미 수강신청을 했습니다.");
         }
 
         lectureRepository.save(lectureItem);
