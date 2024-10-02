@@ -12,5 +12,5 @@ import lombok.Getter;
 public class Lecture {
     private Long id;
     private String title;
-    private String speaker;
+    private String instructor;
 }
