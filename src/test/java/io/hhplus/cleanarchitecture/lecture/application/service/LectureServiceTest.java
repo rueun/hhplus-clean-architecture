@@ -73,7 +73,7 @@ class LectureServiceTest {
         // Then
         assertAll(
                 () -> verify(lectureRepository).getItemById(1L, 1L),
-                () -> verify(lectureRepository).save(any(LectureItem.class)),
+                () -> verify(lectureRepository).saveItem(any(LectureItem.class)),
                 () -> verify(lectureEnrollmentRepository).save(any(LectureEnrollment.class))
         );
     }

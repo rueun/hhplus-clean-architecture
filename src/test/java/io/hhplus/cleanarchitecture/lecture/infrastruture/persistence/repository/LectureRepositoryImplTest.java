@@ -66,7 +66,7 @@ class LectureRepositoryImplTest {
                 .build();
 
         // When
-        final LectureItem savedLectureItem = lectureRepository.save(lectureItem);
+        final LectureItem savedLectureItem = lectureRepository.saveItem(lectureItem);
 
         // Then
         // 한 번에 검사
@@ -97,7 +97,7 @@ class LectureRepositoryImplTest {
                 .build();
 
         // When
-        final List<LectureItem> lectureItems = lectureRepository.saveAll(List.of(lectureItem1, lectureItem2));
+        final List<LectureItem> lectureItems = lectureRepository.saveAllItem(List.of(lectureItem1, lectureItem2));
 
         // Then
         // 한 번에 검사

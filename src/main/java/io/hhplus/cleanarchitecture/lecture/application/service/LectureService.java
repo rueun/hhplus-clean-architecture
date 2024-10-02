@@ -45,7 +45,7 @@ public class LectureService {
             throw new LectureAlreadyEnrolledException("해당 유저는 이미 수강신청을 했습니다.");
         }
 
-        lectureRepository.save(lectureItem);
+        lectureRepository.saveItem(lectureItem);
         return lectureEnrollmentRepository.save(enrollment);
     }
 

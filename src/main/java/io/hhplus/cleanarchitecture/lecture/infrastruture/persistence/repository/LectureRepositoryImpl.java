@@ -29,13 +29,13 @@ public class LectureRepositoryImpl implements LectureRepository {
     }
 
     @Override
-    public LectureItem save(final LectureItem lectureItem) {
+    public LectureItem saveItem(final LectureItem lectureItem) {
         final LectureItemJpaEntity jpaEntity = lectureItemJpaRepository.save(LectureItemMapper.toJpaEntity(lectureItem));
         return LectureItemMapper.toDomain(jpaEntity);
     }
 
     @Override
-    public List<LectureItem> saveAll(final List<LectureItem> lectureItems) {
+    public List<LectureItem> saveAllItem(final List<LectureItem> lectureItems) {
         List<LectureItemJpaEntity> jpaEntities = lectureItems.stream()
                 .map(LectureItemMapper::toJpaEntity)
                 .toList();
