@@ -11,10 +11,7 @@ public class LectureMapper {
         return LectureJpaEntity.builder()
                 .id(lecture.getId())
                 .title(lecture.getTitle())
-                .speaker(lecture.getSpeaker())
-                .maxEnrollmentCount(lecture.getMaxEnrollmentCount())
-                .enrolledCount(lecture.getEnrolledCount())
-                .enrollOpenAt(lecture.getEnrollOpenAt())
+                .instructor(lecture.getSpeaker())
                 .build();
     }
 
@@ -22,10 +19,7 @@ public class LectureMapper {
         return Lecture.builder()
                 .id(lectureJpaEntity.getId())
                 .title(lectureJpaEntity.getTitle())
-                .speaker(lectureJpaEntity.getSpeaker())
-                .maxEnrollmentCount(lectureJpaEntity.getMaxEnrollmentCount())
-                .enrolledCount(lectureJpaEntity.getEnrolledCount())
-                .enrollOpenAt(lectureJpaEntity.getEnrollOpenAt())
+                .speaker(lectureJpaEntity.getInstructor())
                 .build();
     }
 }

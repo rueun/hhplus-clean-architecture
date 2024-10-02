@@ -20,8 +20,12 @@ public class LectureEnrollmentJpaEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // 비정규화로 인한 lecture_id 필드 추가
     @Column(name = "lecture_id", nullable = false)
     private Long lectureId;
+
+    @JoinColumn(name = "lecture_item_id", nullable = false)
+    private Long lectureItemId;
 
     @Column(name = "user_id", nullable = false)
     private Long userId;
