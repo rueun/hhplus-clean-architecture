@@ -1,5 +1,7 @@
 package io.hhplus.cleanarchitecture.lecture.domain.entity;
 
+import io.hhplus.cleanarchitecture.lecture.domain.exception.LectureCapacityExceededException;
+import io.hhplus.cleanarchitecture.lecture.domain.exception.LectureEnrollmentClosedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -39,7 +41,7 @@ class LectureItemTest {
 
         // When & Then
         thenThrownBy(() -> lectureItem.enroll(LocalDateTime.parse("2024-10-01T10:00")))
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(LectureCapacityExceededException.class)
                 .hasMessage("잔여 수량이 없습니다.");
     }
 
@@ -54,7 +56,7 @@ class LectureItemTest {
 
         // When & Then
         thenThrownBy(() -> lectureItem.enroll(LocalDateTime.parse("2024-10-01T10:01")))
-                .isInstanceOf(IllegalStateException.class)
+                .isInstanceOf(LectureEnrollmentClosedException.class)
                 .hasMessage("수강 신청 시간이 지났습니다.");
     }
 }

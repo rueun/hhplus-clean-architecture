@@ -7,6 +7,9 @@ import io.hhplus.cleanarchitecture.lecture.application.dto.LectureWithItems;
 import io.hhplus.cleanarchitecture.lecture.domain.entity.Lecture;
 import io.hhplus.cleanarchitecture.lecture.domain.entity.LectureEnrollment;
 import io.hhplus.cleanarchitecture.lecture.domain.entity.LectureItem;
+import io.hhplus.cleanarchitecture.lecture.domain.exception.LectureAlreadyEnrolledException;
+import io.hhplus.cleanarchitecture.lecture.domain.exception.LectureCapacityExceededException;
+import io.hhplus.cleanarchitecture.lecture.domain.exception.LectureEnrollmentClosedException;
 import io.hhplus.cleanarchitecture.lecture.domain.repository.LectureEnrollmentRepository;
 import io.hhplus.cleanarchitecture.lecture.domain.repository.LectureRepository;
 import org.junit.jupiter.api.Test;
@@ -99,7 +102,7 @@ class LectureServiceTest {
 
         // When & Then
         thenThrownBy(() -> lectureService.enroll(command))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(LectureAlreadyEnrolledException.class)
                 .hasMessage("해당 유저는 이미 수강신청을 했습니다.");
     }
 
@@ -125,7 +128,7 @@ class LectureServiceTest {
 
         // When & Then
         thenThrownBy(() -> lectureService.enroll(command))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(LectureEnrollmentClosedException.class)
                 .hasMessage("수강 신청 시간이 지났습니다.");
     }
 
@@ -148,7 +151,7 @@ class LectureServiceTest {
 
         // When & Then
         thenThrownBy(() -> lectureService.enroll(command))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(LectureCapacityExceededException.class)
                 .hasMessage("잔여 수량이 없습니다.");
     }
 
