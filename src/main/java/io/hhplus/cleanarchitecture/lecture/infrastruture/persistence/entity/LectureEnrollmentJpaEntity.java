@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 @Entity
-@Table(name = "recture_enrollment", uniqueConstraints = {
+@Table(name = "lecture_enrollment", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"lecture_id", "user_id"})
 })
 public class LectureEnrollmentJpaEntity {
