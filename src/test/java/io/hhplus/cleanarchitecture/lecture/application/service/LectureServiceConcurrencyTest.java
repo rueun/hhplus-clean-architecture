@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.time.LocalDateTime;
@@ -26,6 +27,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.assertj.core.api.BDDAssertions.then;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 @ActiveProfiles("test")
 @SpringBootTest
 class LectureServiceConcurrencyTest {
@@ -46,7 +48,7 @@ class LectureServiceConcurrencyTest {
     void 다른_사용자_40명이_동시에_동일한_강의에_요청하는_경우_30명만_수강신청에_성공한다() throws InterruptedException {
         // Given
         Lecture lecture = Lecture.builder()
-                .title("강의")
+                .title("강의명")
                 .instructor("강사")
                 .build();
         final Lecture savedLecture = lectureRepository.save(lecture);
