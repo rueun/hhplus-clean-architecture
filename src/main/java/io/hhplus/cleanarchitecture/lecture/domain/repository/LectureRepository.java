@@ -12,7 +12,7 @@ public interface LectureRepository {
     List<LectureItem> saveAll(List<LectureItem> lectureItems);
     Lecture getById(Long lectureId);
     List<Lecture> getByIds(List<Long> lectureIds);
-    LectureItem getItemById(Long lectureId, Long itemId);
+    LectureItem getItemById(Long lectureId, Long lectureItemId);
     Map<Long, List<LectureItem>> getLectureItemMap(List<Long> lectureIds);
     List<Lecture> getAvailableLectures(Long userId);
 }

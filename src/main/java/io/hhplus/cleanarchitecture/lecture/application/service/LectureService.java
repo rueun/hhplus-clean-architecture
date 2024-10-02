@@ -1,8 +1,9 @@
 package io.hhplus.cleanarchitecture.lecture.application.service;
 
 import io.hhplus.cleanarchitecture.common.time.TimeProvider;
-import io.hhplus.cleanarchitecture.lecture.application.dto.EnrollLectureCommand;
+import io.hhplus.cleanarchitecture.lecture.application.dto.LectureEnrollmentInfo;
 import io.hhplus.cleanarchitecture.lecture.application.dto.LectureWithItems;
+import io.hhplus.cleanarchitecture.lecture.application.dto.command.EnrollLectureCommand;
 import io.hhplus.cleanarchitecture.lecture.domain.entity.Lecture;
 import io.hhplus.cleanarchitecture.lecture.domain.entity.LectureEnrollment;
 import io.hhplus.cleanarchitecture.lecture.domain.entity.LectureItem;
@@ -88,7 +89,7 @@ public class LectureService {
      * @param userId 사용자 ID
      * @return 사용자가 신청한 모든 강의 목록
      */
-    public List<LectureWithItems> getUserLectures(final Long userId) {
+    public List<LectureEnrollmentInfo> getUserLectureEnrollments(final Long userId) {
         // 사용자의 모든 강의 신청 기록을 가져옴
         final List<LectureEnrollment> enrollments = lectureEnrollmentRepository.findAllByUserId(userId);
 
@@ -96,7 +97,7 @@ public class LectureService {
                 .map(enrollment -> {
                     final Lecture lecture = lectureRepository.getById(enrollment.getLectureId());
                     final LectureItem item = lectureRepository.getItemById(enrollment.getLectureId(), enrollment.getLectureItemId());
-                    return LectureWithItems.of(lecture, List.of(item));
+                    return LectureEnrollmentInfo.of(lecture, item, enrollment);
                 }).toList();
     }
 

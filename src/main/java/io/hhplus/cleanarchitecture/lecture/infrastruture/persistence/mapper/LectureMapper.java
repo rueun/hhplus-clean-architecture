@@ -11,7 +11,7 @@ public class LectureMapper {
         return LectureJpaEntity.builder()
                 .id(lecture.getId())
                 .title(lecture.getTitle())
-                .instructor(lecture.getSpeaker())
+                .instructor(lecture.getInstructor())
                 .build();
     }
 
@@ -19,7 +19,7 @@ public class LectureMapper {
         return Lecture.builder()
                 .id(lectureJpaEntity.getId())
                 .title(lectureJpaEntity.getTitle())
-                .speaker(lectureJpaEntity.getInstructor())
+                .instructor(lectureJpaEntity.getInstructor())
                 .build();
     }
 }

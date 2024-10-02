@@ -61,8 +61,8 @@ public class LectureRepositoryImpl implements LectureRepository {
     }
 
     @Override
-    public LectureItem getItemById(final Long lectureId, final Long itemId) {
-        LectureItemJpaEntity jpaEntity = lectureItemJpaRepository.findByLectureIdAndId(lectureId, itemId)
+    public LectureItem getItemById(final Long lectureId, final Long lectureItemId) {
+        LectureItemJpaEntity jpaEntity = lectureItemJpaRepository.findByLectureIdAndId(lectureId, lectureItemId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 강의 아이템을 찾을 수 없습니다."));
         return LectureItemMapper.toDomain(jpaEntity);
     }

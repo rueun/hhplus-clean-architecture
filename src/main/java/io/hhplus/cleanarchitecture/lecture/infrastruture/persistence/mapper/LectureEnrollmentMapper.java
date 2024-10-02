@@ -11,6 +11,7 @@ public class LectureEnrollmentMapper {
         return LectureEnrollmentJpaEntity.builder()
                 .id(lectureEnrollment.getId())
                 .lectureId(lectureEnrollment.getLectureId())
+                .lectureItemId(lectureEnrollment.getLectureItemId())
                 .userId(lectureEnrollment.getUserId())
                 .enrolledAt(lectureEnrollment.getEnrolledAt())
                 .build();
@@ -20,6 +21,7 @@ public class LectureEnrollmentMapper {
         return LectureEnrollment.builder()
                 .id(lectureEnrollmentJpaEntity.getId())
                 .lectureId(lectureEnrollmentJpaEntity.getLectureId())
+                .lectureItemId(lectureEnrollmentJpaEntity.getLectureItemId())
                 .userId(lectureEnrollmentJpaEntity.getUserId())
                 .enrolledAt(lectureEnrollmentJpaEntity.getEnrolledAt())
                 .build();
