@@ -95,6 +95,60 @@ class LectureServiceConcurrencyTest {
     }
 
 
+    @Test
+    void 다른_사용자_20명이_동시에_동일한_강의에_요청하는_경우_20명_모두_수강신청에_성공한다() throws InterruptedException {
+        // Given
+        Lecture lecture = Lecture.builder()
+                .title("강의명")
+                .instructor("강사")
+                .build();
+        final Lecture savedLecture = lectureRepository.save(lecture);
+
+        LectureItem lectureItem = LectureItem.builder()
+                .capacity(30)
+                .remainingCapacity(30)
+                .lectureId(savedLecture.getId())
+                .lectureTime(LocalDateTime.parse("2024-10-05T10:00"))
+                .build();
+        final LectureItem savedLectureItem = lectureRepository.saveItem(lectureItem);
+
+        // When
+        final int threadCount = 20;
+        AtomicInteger failedCount = new AtomicInteger(0);
+        ExecutorService executorService = Executors.newFixedThreadPool(threadCount);
+        CountDownLatch countDownLatch = new CountDownLatch(threadCount);
+
+        for (int i = 1; i <= threadCount; i++) {
+            long finalI = i;
+            executorService.execute(() -> {
+                try {
+                    lectureService.enroll(EnrollLectureCommand.builder()
+                            .lectureId(savedLecture.getId())
+                            .lectureItemId(savedLectureItem.getId())
+                            .userId(finalI)
+                            .build());
+                } catch (Exception e) {
+                    failedCount.incrementAndGet();
+                } finally {
+                    countDownLatch.countDown();
+                }
+            });
+        }
+        countDownLatch.await();
+
+        // Then
+        final LectureItem resultLectureItem = lectureRepository.getItemById(savedLecture.getId(), savedLectureItem.getId());
+        final List<LectureEnrollment> enrollmentsByLectureItemId = lectureEnrollmentRepository.findAllByLectureItemId(savedLectureItem.getId());
+
+        assertAll(
+                () -> then(failedCount.get()).isEqualTo(0),
+                () -> then(resultLectureItem.getRemainingCapacity()).isEqualTo(10),
+                () -> then(enrollmentsByLectureItemId.size()).isEqualTo(20)
+        );
+    }
+
+
+
     @TestConfiguration
     static class TestConfig {
 
