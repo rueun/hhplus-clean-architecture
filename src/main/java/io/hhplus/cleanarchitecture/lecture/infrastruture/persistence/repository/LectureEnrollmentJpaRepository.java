@@ -27,12 +27,5 @@ public interface LectureEnrollmentJpaRepository extends JpaRepository<LectureEnr
     List<LectureEnrollmentJpaEntity> findAllByLectureItemId(@Param("lectureItemId") final Long lectureItemId);
 
 
-    @Query("""
-                SELECT e
-                FROM LectureEnrollmentJpaEntity e
-                LEFT JOIN LectureItemJpaEntity i ON e.lectureItemId = i.id
-                WHERE i.lectureId = :lectureId AND e.userId = :userId
-            """)
     Optional<LectureEnrollmentJpaEntity> findByLectureIdAndUserId(@Param("lectureId") final Long lectureId, @Param("userId") final Long userId);
-
 }

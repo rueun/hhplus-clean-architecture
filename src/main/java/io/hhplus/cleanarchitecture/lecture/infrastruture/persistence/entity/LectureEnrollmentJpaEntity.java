@@ -12,13 +12,17 @@ import java.time.LocalDateTime;
 @Builder
 @Entity
 @Table(name = "lecture_enrollment", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"lecture_item_id", "user_id"})
+        @UniqueConstraint(columnNames = {"lecture_id", "user_id"})
 })
 public class LectureEnrollmentJpaEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @JoinColumn
+    @Column(name = "lecture_id", nullable = false)
+    private Long lectureId;
 
     @JoinColumn(name = "lecture_item_id", nullable = false)
     private Long lectureItemId;

@@ -85,16 +85,6 @@ class LectureServiceTest {
                 .userId(1L)
                 .build();
 
-        given(lectureRepository.getItemByIdWithPessimisticLock(1L, 1L)).willReturn(
-                LectureItem.builder()
-                        .id(1L)
-                        .capacity(30)
-                        .remainingCapacity(29)
-                        .lectureTime(LocalDateTime.parse("2024-10-01T10:00"))
-                        .build());
-
-        given(timeProvider.now()).willReturn(LocalDateTime.parse("2024-10-01T10:00"));
-
         given(lectureEnrollmentRepository.existsByLectureIdAndUserId(anyLong(), anyLong()))
                 .willReturn(true);
 
