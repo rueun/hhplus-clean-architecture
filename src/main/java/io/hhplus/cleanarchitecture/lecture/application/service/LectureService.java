@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -36,16 +38,15 @@ public class LectureService {
     public LectureEnrollment enroll(final EnrollLectureCommand command) {
         LocalDateTime enrolledAt = timeProvider.now();
 
-        // TODO: 2024-10-02 동시성 제어를 위해 Pessimistic Locking을 사용해야 함
-        final LectureItem lectureItem = lectureRepository.getItemById(command.getLectureId(), command.getLectureItemId());
+        final LectureItem lectureItem = lectureRepository.getItemByIdWithPessimisticLock(command.getLectureId(), command.getLectureItemId());
         lectureItem.enroll(enrolledAt);
 
-        final LectureEnrollment enrollment = LectureEnrollment.of(command.getLectureId(), command.getLectureItemId(), command.getUserId(), enrolledAt);
+        final LectureEnrollment enrollment = LectureEnrollment.of(command.getLectureItemId(), command.getUserId(), enrolledAt);
         if (lectureEnrollmentRepository.existsByLectureIdAndUserId(command.getLectureId(), command.getUserId())) {
             throw new LectureAlreadyEnrolledException("해당 유저는 이미 수강신청을 했습니다.");
         }
 
-        lectureRepository.save(lectureItem);
+        lectureRepository.saveItem(lectureItem);
         return lectureEnrollmentRepository.save(enrollment);
     }
 
@@ -62,7 +63,7 @@ public class LectureService {
 
     /**
      * 사용자가 신청 가능한 강의 목록을 가져온다.
-     * 수강 가능한 강의는 아직 수강 신청이 안된 강의 중에서, 잔여 수량이 있는 강의만을 의미한다.
+     * 수강 가능한 강의는 사용자가 수강 신청을 하지 않은 강의 중에서, 현재 시간보다 미래에 있는 강의이며, 잔여 수량이 있는 강의만 의미합니다.
      * @param userId 사용자 ID
      * @return 사용자가 수강 가능한 강의 목록
      */
@@ -78,6 +79,7 @@ public class LectureService {
                     final List<LectureItem> availableItems = lectureItemMap.getOrDefault(lecture.getId(), List.of())
                             .stream()
                             .filter(item -> item.getRemainingCapacity() > 0)
+                            .filter(item -> item.getLectureTime().isAfter(timeProvider.now()))
                             .toList();
                     return LectureWithItems.of(lecture, availableItems);
                 })
@@ -91,15 +93,30 @@ public class LectureService {
      * @return 사용자가 신청한 모든 강의 목록
      */
     public List<LectureEnrollmentInfo> getUserLectureEnrollments(final Long userId) {
-        // 사용자의 모든 강의 신청 기록을 가져옴
         final List<LectureEnrollment> enrollments = lectureEnrollmentRepository.findAllByUserId(userId);
 
+        // 강의 ID와 강의 아이템 ID로 각각 강의와 강의 아이템을 조회
+
+        final List<Long> lectureItemIds = enrollments.stream().map(LectureEnrollment::getLectureItemId).toList();
+        final Map<Long, LectureItem> lectureItemMap = lectureRepository.getItemsByIds(lectureItemIds)
+                .stream()
+                .collect(Collectors.toMap(LectureItem::getId, Function.identity()));
+
+        final List<Long> lectureIds = lectureItemMap.values().stream()
+                .map(LectureItem::getLectureId)
+                .toList();
+
+        final Map<Long, Lecture> lectureMap = lectureRepository.getByIds(lectureIds).stream()
+                .collect(Collectors.toMap(Lecture::getId, Function.identity()));
+
+        // 강의, 강의 아이템, 수강신청 정보를 조합하여 반환
         return enrollments.stream()
                 .map(enrollment -> {
-                    final Lecture lecture = lectureRepository.getById(enrollment.getLectureId());
-                    final LectureItem item = lectureRepository.getItemById(enrollment.getLectureId(), enrollment.getLectureItemId());
-                    return LectureEnrollmentInfo.of(lecture, item, enrollment);
-                }).toList();
+                    final LectureItem lectureItem = lectureItemMap.get(enrollment.getLectureItemId());
+                    final Lecture lecture = lectureMap.get(lectureItem.getLectureId());
+                    return LectureEnrollmentInfo.of(lecture, lectureItem, enrollment);
+                })
+                .toList();
     }
 
 }

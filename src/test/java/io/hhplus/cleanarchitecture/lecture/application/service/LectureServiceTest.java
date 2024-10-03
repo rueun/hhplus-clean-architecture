@@ -23,12 +23,10 @@ import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.BDDAssertions.thenThrownBy;
-import static org.assertj.core.api.BDDAssertions.tuple;
+import static org.assertj.core.api.BDDAssertions.*;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -57,7 +55,7 @@ class LectureServiceTest {
                 .userId(1L)
                 .build();
 
-        given(lectureRepository.getItemById(1L, 1L)).willReturn(
+        given(lectureRepository.getItemByIdWithPessimisticLock(1L, 1L)).willReturn(
                 LectureItem.builder()
                         .id(1L)
                         .capacity(30)
@@ -72,8 +70,8 @@ class LectureServiceTest {
 
         // Then
         assertAll(
-                () -> verify(lectureRepository).getItemById(1L, 1L),
-                () -> verify(lectureRepository).save(any(LectureItem.class)),
+                () -> verify(lectureRepository).getItemByIdWithPessimisticLock(1L, 1L),
+                () -> verify(lectureRepository).saveItem(any(LectureItem.class)),
                 () -> verify(lectureEnrollmentRepository).save(any(LectureEnrollment.class))
         );
     }
@@ -87,7 +85,7 @@ class LectureServiceTest {
                 .userId(1L)
                 .build();
 
-        given(lectureRepository.getItemById(1L, 1L)).willReturn(
+        given(lectureRepository.getItemByIdWithPessimisticLock(1L, 1L)).willReturn(
                 LectureItem.builder()
                         .id(1L)
                         .capacity(30)
@@ -116,7 +114,7 @@ class LectureServiceTest {
                 .userId(1L)
                 .build();
 
-        given(lectureRepository.getItemById(1L, 1L)).willReturn(
+        given(lectureRepository.getItemByIdWithPessimisticLock(1L, 1L)).willReturn(
                 LectureItem.builder()
                         .id(1L)
                         .capacity(30)
@@ -141,7 +139,7 @@ class LectureServiceTest {
                 .userId(1L)
                 .build();
 
-        given(lectureRepository.getItemById(1L, 1L)).willReturn(
+        given(lectureRepository.getItemByIdWithPessimisticLock(1L, 1L)).willReturn(
                 LectureItem.builder()
                         .id(1L)
                         .capacity(30)
@@ -165,28 +163,40 @@ class LectureServiceTest {
 
         LectureItem lectureItem1 = LectureItem.builder()
                 .lectureId(1L)
+                .lectureTime(LocalDateTime.parse("2024-10-10T10:00"))
                 .capacity(30)
                 .remainingCapacity(20)
                 .build();
 
         LectureItem lectureItem2 = LectureItem.builder()
                 .lectureId(1L)
+                .lectureTime(LocalDateTime.parse("2024-10-05T10:00"))
                 .capacity(30)
                 .remainingCapacity(0)
                 .build();
 
-        given(lectureRepository.getAvailableLectures(1L)).willReturn(List.of(lecture));
-        given(lectureRepository.getLectureItemMap(List.of(1L))).willReturn(Map.of(
-                1L, List.of(lectureItem1, lectureItem2)
+        LectureItem lectureItem3 = LectureItem.builder()
+                .lectureId(1L)
+                .lectureTime(LocalDateTime.parse("2024-10-01T10:00"))
+                .capacity(30)
+                .remainingCapacity(20)
+                .build();
+
+        given(timeProvider.now()).willReturn(LocalDateTime.parse("2024-10-01T10:00"));
+        given(lectureRepository.getAvailableLectures(anyLong())).willReturn(List.of(lecture));
+        given(lectureRepository.getLectureItemMap(anyList())).willReturn(Map.of(
+                1L, List.of(lectureItem1, lectureItem2, lectureItem3)
         ));
+
 
         // When
         List<LectureWithItems> availableLectures = lectureService.getAvailableLectures(1L);
 
         // Then
+        // 잔여 수량이 있고, 현재 시간보다 미래에 있는 강의만 가져와야 함
         assertAll(
                 () -> assertEquals(1, availableLectures.size()),
-                () -> assertEquals(1, availableLectures.get(0).getItems().size()), // 잔여 수량이 있는 강의 아이템만 포함되어야 함
+                () -> assertEquals(1, availableLectures.get(0).getItems().size()),
                 () -> assertThat(availableLectures.get(0).getItems()).extracting("lectureId", "capacity", "remainingCapacity")
                         .containsExactly(
                                 tuple(1L, 30, 20)
@@ -204,29 +214,28 @@ class LectureServiceTest {
 
         LectureItem lectureItem1 = LectureItem.builder()
                 .id(1L)
-                .lectureTime(LocalDateTime.parse("2024-10-01T10:00"))
+                .lectureId(1L)
+                .lectureTime(LocalDateTime.parse("2024-10-10T10:00"))
                 .build();
         LectureItem lectureItem2 = LectureItem.builder()
                 .id(2L)
-                .lectureTime(LocalDateTime.parse("2024-10-01T10:00"))
+                .lectureId(2L)
+                .lectureTime(LocalDateTime.parse("2024-10-05T10:00"))
                 .build();
 
         LectureEnrollment enrollment1 = LectureEnrollment.builder()
-                .lectureId(1L)
                 .lectureItemId(1L)
-                .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
+                .enrolledAt(LocalDateTime.parse("2024-10-09T10:00"))
                 .build();
         LectureEnrollment enrollment2 = LectureEnrollment.builder()
-                .lectureId(2L)
                 .lectureItemId(2L)
+                .enrolledAt(LocalDateTime.parse("2024-10-04T10:00"))
                 .build();
 
         // Mocking repository responses
         given(lectureEnrollmentRepository.findAllByUserId(userId)).willReturn(List.of(enrollment1, enrollment2));
-        given(lectureRepository.getById(1L)).willReturn(lecture1);
-        given(lectureRepository.getById(2L)).willReturn(lecture2);
-        given(lectureRepository.getItemById(1L, 1L)).willReturn(lectureItem1);
-        given(lectureRepository.getItemById(2L, 2L)).willReturn(lectureItem2);
+        given(lectureRepository.getItemsByIds(anyList())).willReturn(List.of(lectureItem1, lectureItem2));
+        given(lectureRepository.getByIds(anyList())).willReturn(List.of(lecture1, lecture2));
 
         // When
         List<LectureEnrollmentInfo> userLectureEnrollments = lectureService.getUserLectureEnrollments(userId);
@@ -239,13 +248,16 @@ class LectureServiceTest {
                     final LectureEnrollmentInfo firstLectureEnrollment = userLectureEnrollments.get(0);
                     assertEquals("특강1", firstLectureEnrollment.getLecture().getTitle());
                     assertEquals(1L, firstLectureEnrollment.getLecture().getId());
-                    assertEquals(LocalDateTime.parse("2024-10-01T10:00"), firstLectureEnrollment.getLectureItem().getLectureTime());
+                    assertEquals(LocalDateTime.parse("2024-10-10T10:00"), firstLectureEnrollment.getLectureItem().getLectureTime());
+                    assertThat(firstLectureEnrollment.getLectureEnrollment().getEnrolledAt()).isEqualTo(LocalDateTime.parse("2024-10-09T10:00"));
+
 
                     // 두 번째 강의 검증
                     final LectureEnrollmentInfo secondLectureEnrollment = userLectureEnrollments.get(1);
                     assertEquals("특강2", secondLectureEnrollment.getLecture().getTitle());
                     assertEquals(2L, secondLectureEnrollment.getLecture().getId());
-                    assertEquals(LocalDateTime.parse("2024-10-01T10:00"), secondLectureEnrollment.getLectureItem().getLectureTime());
+                    assertEquals(LocalDateTime.parse("2024-10-05T10:00"), secondLectureEnrollment.getLectureItem().getLectureTime());
+                    assertThat(secondLectureEnrollment.getLectureEnrollment().getEnrolledAt()).isEqualTo(LocalDateTime.parse("2024-10-04T10:00"));
                 }
         );
     }

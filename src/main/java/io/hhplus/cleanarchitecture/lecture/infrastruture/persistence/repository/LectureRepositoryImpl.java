@@ -29,13 +29,13 @@ public class LectureRepositoryImpl implements LectureRepository {
     }
 
     @Override
-    public LectureItem save(final LectureItem lectureItem) {
+    public LectureItem saveItem(final LectureItem lectureItem) {
         final LectureItemJpaEntity jpaEntity = lectureItemJpaRepository.save(LectureItemMapper.toJpaEntity(lectureItem));
         return LectureItemMapper.toDomain(jpaEntity);
     }
 
     @Override
-    public List<LectureItem> saveAll(final List<LectureItem> lectureItems) {
+    public List<LectureItem> saveAllItem(final List<LectureItem> lectureItems) {
         List<LectureItemJpaEntity> jpaEntities = lectureItems.stream()
                 .map(LectureItemMapper::toJpaEntity)
                 .toList();
@@ -71,19 +71,29 @@ public class LectureRepositoryImpl implements LectureRepository {
 
 
     @Override
-    public Map<Long, List<LectureItem>> getLectureItemMap(final List<Long> lectureIds) {
-        List<LectureJpaEntity> lectureJpaEntities = lectureJpaRepository.findAllById(lectureIds);
+    public List<LectureItem> getItemsByIds(List<Long> lectureItemIds) {
+        List<LectureItemJpaEntity> jpaEntities = lectureItemJpaRepository.findAllById(lectureItemIds);
+        return jpaEntities.stream()
+                .map(LectureItemMapper::toDomain)
+                .toList();
+    }
 
-        return lectureJpaEntities.stream()
-                .collect(Collectors.toMap(
-                        LectureJpaEntity::getId,
-                        lectureJpaEntity -> {
-                            List<LectureItemJpaEntity> lectureItemJpaEntities = lectureItemJpaRepository.findAllByLectureId(lectureJpaEntity.getId());
-                            return lectureItemJpaEntities.stream()
-                                    .map(LectureItemMapper::toDomain)
-                                    .toList();
-                        }
-                ));
+
+    @Override
+    public LectureItem getItemByIdWithPessimisticLock(final Long lectureId, final Long lectureItemId) {
+        LectureItemJpaEntity jpaEntity = lectureItemJpaRepository.findByIdWithPessimisticLock(lectureId, lectureItemId)
+                .orElseThrow(() -> new LectureItemNotFoundException("해당 강의 아이템을 찾을 수 없습니다."));
+        return LectureItemMapper.toDomain(jpaEntity);
+    }
+
+
+    @Override
+    public Map<Long, List<LectureItem>> getLectureItemMap(final List<Long> lectureIds) {
+        List<LectureItemJpaEntity> lectureItemJpaEntities = lectureItemJpaRepository.findAllByLectureIdIn(lectureIds);
+
+        return lectureItemJpaEntities.stream()
+                .map(LectureItemMapper::toDomain)
+                .collect(Collectors.groupingBy(LectureItem::getLectureId));
     }
 
     @Override
@@ -93,5 +103,4 @@ public class LectureRepositoryImpl implements LectureRepository {
                 .map(LectureMapper::toDomain)
                 .toList();
     }
-
 }
