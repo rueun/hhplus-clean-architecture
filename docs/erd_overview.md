@@ -17,7 +17,7 @@ erDiagram
 
     LECTURE_ITEM {
         bigint id PK
-        bigint lecture_id FK
+        bigint lecture_id
         int capacity
         int remaining_capacity
         timestamp lecture_time
@@ -26,14 +26,10 @@ erDiagram
     LECTURE_ENROLLMENT {
         bigint id PK
         timestamp enrolled_at
-        bigint lecture_id FK
-        bigint lecture_item_id FK
-        bigint user_id FK
+        bigint lecture_id
+        bigint lecture_item_id
+        bigint user_id
     }
-
-    USERS ||--o{ LECTURE_ENROLLMENT : "enrolls"
-    LECTURE ||--o{ LECTURE_ITEM : "has"
-    LECTURE_ITEM ||--o{ LECTURE_ENROLLMENT : "is enrolled in"
 ```
 
 # 설계 설명
