@@ -327,6 +327,7 @@ class LectureRepositoryImplTest {
 
         lectureEnrollmentJpaRepository.save(
                 LectureEnrollmentJpaEntity.builder()
+                        .lectureId(lecture1.getId())
                         .lectureItemId(lectureItem1.getId())
                         .userId(1L)
                         .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))

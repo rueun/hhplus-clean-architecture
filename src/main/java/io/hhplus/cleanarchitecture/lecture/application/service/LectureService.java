@@ -11,6 +11,7 @@ import io.hhplus.cleanarchitecture.lecture.domain.exception.LectureAlreadyEnroll
 import io.hhplus.cleanarchitecture.lecture.domain.repository.LectureEnrollmentRepository;
 import io.hhplus.cleanarchitecture.lecture.domain.repository.LectureRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,20 +37,23 @@ public class LectureService {
      */
     @Transactional
     public LectureEnrollment enroll(final EnrollLectureCommand command) {
+
         LocalDateTime enrolledAt = timeProvider.now();
-
         final LectureItem lectureItem = lectureRepository.getItemByIdWithPessimisticLock(command.getLectureId(), command.getLectureItemId());
-        lectureItem.enroll(enrolledAt);
-
-        final LectureEnrollment enrollment = LectureEnrollment.of(command.getLectureItemId(), command.getUserId(), enrolledAt);
         if (lectureEnrollmentRepository.existsByLectureIdAndUserId(command.getLectureId(), command.getUserId())) {
             throw new LectureAlreadyEnrolledException("해당 유저는 이미 수강신청을 했습니다.");
         }
 
-        lectureRepository.saveItem(lectureItem);
-        return lectureEnrollmentRepository.save(enrollment);
-    }
+        lectureItem.enroll(enrolledAt);
+        final LectureEnrollment enrollment = LectureEnrollment.of(command.getLectureId(), command.getLectureItemId(), command.getUserId(), enrolledAt);
 
+        try {
+            lectureRepository.saveItem(lectureItem);
+            return lectureEnrollmentRepository.save(enrollment);
+        } catch (DataIntegrityViolationException e) {
+            throw new LectureAlreadyEnrolledException("해당 유저는 이미 수강신청을 했습니다.");
+        }
+    }
 
     /**
      * 특정 유저가 특정한 특강에 신청했는지 확인한다.
@@ -75,7 +79,7 @@ public class LectureService {
 
         return availableLectures.stream()
                 .map(lecture -> {
-                    // 해당 강의의 아이템 리스트에서 remainingCapacity > 0인 것만 필터링
+                    // 해당 강의의 아이템 항목에서 잔여 수량이 있고, 강의 시간이 현재 시간 이후인 경우만 필터링
                     final List<LectureItem> availableItems = lectureItemMap.getOrDefault(lecture.getId(), List.of())
                             .stream()
                             .filter(item -> item.getRemainingCapacity() > 0)

@@ -40,6 +40,7 @@ class LectureEnrollmentRepositoryImplTest {
     void 수강신청_내역을_저장할_수_있다() {
         // Given
         LectureEnrollmentJpaEntity lectureEnrollment = LectureEnrollmentJpaEntity.builder()
+                .lectureId(1L)
                 .lectureItemId(1L)
                 .userId(1L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
@@ -61,12 +62,14 @@ class LectureEnrollmentRepositoryImplTest {
     void 유저의_수강신청_내역을_조회할_수_있다() {
         // Given
         LectureEnrollmentJpaEntity lectureEnrollment1 = LectureEnrollmentJpaEntity.builder()
+                .lectureId(1L)
                 .lectureItemId(1L)
                 .userId(1L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
                 .build();
 
         LectureEnrollmentJpaEntity lectureEnrollment2 = LectureEnrollmentJpaEntity.builder()
+                .lectureId(2L)
                 .lectureItemId(2L)
                 .userId(1L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
@@ -94,12 +97,14 @@ class LectureEnrollmentRepositoryImplTest {
         // Given
         LectureEnrollmentJpaEntity lectureEnrollment1 = LectureEnrollmentJpaEntity.builder()
                 .lectureItemId(1L)
+                .lectureId(1L)
                 .userId(1L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
                 .build();
 
         LectureEnrollmentJpaEntity lectureEnrollment2 = LectureEnrollmentJpaEntity.builder()
                 .lectureItemId(1L)
+                .lectureId(1L)
                 .userId(2L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
                 .build();
@@ -136,12 +141,14 @@ class LectureEnrollmentRepositoryImplTest {
                 .build();
 
         LectureEnrollmentJpaEntity lectureEnrollment1 = LectureEnrollmentJpaEntity.builder()
+                .lectureId(100L)
                 .lectureItemId(1L)
                 .userId(1L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
                 .build();
 
         LectureEnrollmentJpaEntity lectureEnrollment2 = LectureEnrollmentJpaEntity.builder()
+                .lectureId(200L)
                 .lectureItemId(2L)
                 .userId(2L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
