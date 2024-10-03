@@ -30,9 +30,15 @@ erDiagram
         bigint lecture_item_id
         bigint user_id
     }
+
+USERS ||--o{ LECTURE_ENROLLMENT : "enrolls"
+LECTURE ||--o{ LECTURE_ITEM : "has"
+LECTURE_ITEM ||--o{ LECTURE_ENROLLMENT : "is enrolled in"
+
 ```
 
 # 구조 설명
+JPAEntity, 테이블 모두 관계는 끊어 놓았지만 가시성이 좋게 논리적인 관계를 표현했습니다.
 
 ---
 
