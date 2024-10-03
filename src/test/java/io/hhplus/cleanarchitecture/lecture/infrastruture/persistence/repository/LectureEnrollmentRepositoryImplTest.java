@@ -1,6 +1,8 @@
 package io.hhplus.cleanarchitecture.lecture.infrastruture.persistence.repository;
 
 import io.hhplus.cleanarchitecture.lecture.domain.entity.LectureEnrollment;
+import io.hhplus.cleanarchitecture.lecture.infrastruture.persistence.entity.LectureEnrollmentJpaEntity;
+import io.hhplus.cleanarchitecture.lecture.infrastruture.persistence.entity.LectureItemJpaEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,9 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 class LectureEnrollmentRepositoryImplTest {
 
     @Autowired
+    private LectureItemJpaRepository lectureItemJpaRepository;
+
+    @Autowired
     private LectureEnrollmentJpaRepository lectureEnrollmentJpaRepository;
 
     private LectureEnrollmentRepositoryImpl lectureEnrollmentRepository;
@@ -34,20 +39,18 @@ class LectureEnrollmentRepositoryImplTest {
     @Test
     void 수강신청_내역을_저장할_수_있다() {
         // Given
-        LectureEnrollment lectureEnrollment = LectureEnrollment.builder()
-                .lectureId(1L)
+        LectureEnrollmentJpaEntity lectureEnrollment = LectureEnrollmentJpaEntity.builder()
                 .lectureItemId(1L)
                 .userId(1L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
                 .build();
 
         // When
-        LectureEnrollment savedLectureEnrollment = lectureEnrollmentRepository.save(lectureEnrollment);
+        final LectureEnrollmentJpaEntity savedLectureEnrollment = lectureEnrollmentJpaRepository.save(lectureEnrollment);
 
         // Then
         assertAll(
                 () -> then(savedLectureEnrollment.getId()).isNotNull(),
-                () -> then(savedLectureEnrollment.getLectureId()).isEqualTo(1L),
                 () -> then(savedLectureEnrollment.getLectureItemId()).isEqualTo(1L),
                 () -> then(savedLectureEnrollment.getUserId()).isEqualTo(1L),
                 () -> then(savedLectureEnrollment.getEnrolledAt()).isEqualTo(LocalDateTime.parse("2024-10-01T10:00"))
@@ -57,22 +60,20 @@ class LectureEnrollmentRepositoryImplTest {
     @Test
     void 유저의_수강신청_내역을_조회할_수_있다() {
         // Given
-        LectureEnrollment lectureEnrollment1 = LectureEnrollment.builder()
-                .lectureId(1L)
+        LectureEnrollmentJpaEntity lectureEnrollment1 = LectureEnrollmentJpaEntity.builder()
                 .lectureItemId(1L)
                 .userId(1L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
                 .build();
 
-        LectureEnrollment lectureEnrollment2 = LectureEnrollment.builder()
-                .lectureId(2L)
-                .lectureItemId(1L)
+        LectureEnrollmentJpaEntity lectureEnrollment2 = LectureEnrollmentJpaEntity.builder()
+                .lectureItemId(2L)
                 .userId(1L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
                 .build();
 
-        lectureEnrollmentRepository.save(lectureEnrollment1);
-        lectureEnrollmentRepository.save(lectureEnrollment2);
+        lectureEnrollmentJpaRepository.save(lectureEnrollment1);
+        lectureEnrollmentJpaRepository.save(lectureEnrollment2);
 
         // When
         List<LectureEnrollment> userEnrollments = lectureEnrollmentRepository.findAllByUserId(1L);
@@ -80,7 +81,7 @@ class LectureEnrollmentRepositoryImplTest {
         // Then
         assertAll (
                 () -> then(userEnrollments.size()).isEqualTo(2),
-                () -> assertThat(userEnrollments).extracting("lectureId", "userId", "enrolledAt")
+                () -> assertThat(userEnrollments).extracting("lectureItemId", "userId", "enrolledAt")
                         .containsExactlyInAnyOrder(
                                 tuple(1L, 1L, LocalDateTime.parse("2024-10-01T10:00")),
                                 tuple(2L, 1L, LocalDateTime.parse("2024-10-01T10:00"))
@@ -91,22 +92,20 @@ class LectureEnrollmentRepositoryImplTest {
     @Test
     void 특정한_특강항목의_수강신청_내역을_조회할_수_있다() {
         // Given
-        LectureEnrollment lectureEnrollment1 = LectureEnrollment.builder()
-                .lectureId(1L)
+        LectureEnrollmentJpaEntity lectureEnrollment1 = LectureEnrollmentJpaEntity.builder()
                 .lectureItemId(1L)
                 .userId(1L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
                 .build();
 
-        LectureEnrollment lectureEnrollment2 = LectureEnrollment.builder()
-                .lectureId(1L)
+        LectureEnrollmentJpaEntity lectureEnrollment2 = LectureEnrollmentJpaEntity.builder()
                 .lectureItemId(1L)
                 .userId(2L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
                 .build();
 
-        lectureEnrollmentRepository.save(lectureEnrollment1);
-        lectureEnrollmentRepository.save(lectureEnrollment2);
+        lectureEnrollmentJpaRepository.save(lectureEnrollment1);
+        lectureEnrollmentJpaRepository.save(lectureEnrollment2);
 
         // When
         List<LectureEnrollment> lectureEnrollments = lectureEnrollmentRepository.findAllByLectureItemId(1L);
@@ -114,10 +113,10 @@ class LectureEnrollmentRepositoryImplTest {
         // Then
         assertAll (
                 () -> then(lectureEnrollments.size()).isEqualTo(2),
-                () -> assertThat(lectureEnrollments).extracting("lectureId", "lectureItemId", "userId", "enrolledAt")
+                () -> assertThat(lectureEnrollments).extracting("lectureItemId", "userId", "enrolledAt")
                         .containsExactlyInAnyOrder(
-                                tuple(1L, 1L, 1L, LocalDateTime.parse("2024-10-01T10:00")),
-                                tuple(1L, 1L, 2L, LocalDateTime.parse("2024-10-01T10:00"))
+                                tuple( 1L, 1L, LocalDateTime.parse("2024-10-01T10:00")),
+                                tuple( 1L, 2L, LocalDateTime.parse("2024-10-01T10:00"))
                         )
         );
     }
@@ -126,29 +125,43 @@ class LectureEnrollmentRepositoryImplTest {
     @Test
     void 유저가_특정_강의에_수강신청을_했는지_확인할_수_있다() {
         // Given
-        LectureEnrollment lectureEnrollment1 = LectureEnrollment.builder()
-                .lectureId(1L)
+        LectureItemJpaEntity lectureItem1 = LectureItemJpaEntity.builder()
+                .lectureId(100L)
+                .lectureTime(LocalDateTime.parse("2024-10-01T10:00"))
+                .build();
+
+        LectureItemJpaEntity lectureItem2= LectureItemJpaEntity.builder()
+                .lectureId(200L)
+                .lectureTime(LocalDateTime.parse("2024-10-01T10:00"))
+                .build();
+
+        LectureEnrollmentJpaEntity lectureEnrollment1 = LectureEnrollmentJpaEntity.builder()
                 .lectureItemId(1L)
                 .userId(1L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
                 .build();
 
-        LectureEnrollment lectureEnrollment2 = LectureEnrollment.builder()
-                .lectureId(2L)
-                .lectureItemId(1L)
+        LectureEnrollmentJpaEntity lectureEnrollment2 = LectureEnrollmentJpaEntity.builder()
+                .lectureItemId(2L)
                 .userId(2L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
                 .build();
 
-        lectureEnrollmentRepository.save(lectureEnrollment1);
-        lectureEnrollmentRepository.save(lectureEnrollment2);
+        lectureItemJpaRepository.saveAll(List.of(lectureItem1, lectureItem2));
+        lectureEnrollmentJpaRepository.save(lectureEnrollment1);
+        lectureEnrollmentJpaRepository.save(lectureEnrollment2);
+
 
         // When
-        boolean exists1 = lectureEnrollmentRepository.existsByLectureIdAndUserId(1L, 1L);
-        boolean exists2 = lectureEnrollmentRepository.existsByLectureIdAndUserId(2L, 1L);
+        boolean exists1 = lectureEnrollmentRepository.existsByLectureIdAndUserId(100L, 1L);
+        boolean exists2 = lectureEnrollmentRepository.existsByLectureIdAndUserId(200L, 1L);
+        boolean exists3 = lectureEnrollmentRepository.existsByLectureIdAndUserId(200L, 2L);
 
         // Then
-        then(exists1).isTrue();
-        then(exists2).isFalse();
+        assertAll(
+                () -> then(exists1).isTrue(),
+                () -> then(exists2).isFalse(),
+                () -> then(exists3).isTrue()
+        );
     }
 }

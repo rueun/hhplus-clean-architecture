@@ -317,9 +317,16 @@ class LectureRepositoryImplTest {
                 .lectureTime(LocalDateTime.parse("2024-10-01T10:00"))
                 .build());
 
-        final LectureEnrollmentJpaEntity enrollment = lectureEnrollmentJpaRepository.save(
+        lectureItemJpaRepository.save(
+                LectureItemJpaEntity.builder()
+                        .lectureId(lecture1.getId())
+                        .capacity(20)
+                        .remainingCapacity(20)
+                        .lectureTime(LocalDateTime.parse("2024-10-01T10:00"))
+                        .build());
+
+        lectureEnrollmentJpaRepository.save(
                 LectureEnrollmentJpaEntity.builder()
-                        .lectureId(1L)
                         .lectureItemId(lectureItem1.getId())
                         .userId(1L)
                         .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))

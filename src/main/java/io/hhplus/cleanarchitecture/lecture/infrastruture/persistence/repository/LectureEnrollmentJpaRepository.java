@@ -6,16 +6,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 
 public interface LectureEnrollmentJpaRepository extends JpaRepository<LectureEnrollmentJpaEntity, Long> {
-
-    @Query("""
-                SELECT e
-                FROM LectureEnrollmentJpaEntity e
-                WHERE e.lectureId = :lectureId
-            """)
-    List<LectureEnrollmentJpaEntity> findAllByLectureId(@Param("lectureId") final Long lectureId);
 
     @Query("""
                 SELECT e
@@ -31,4 +25,14 @@ public interface LectureEnrollmentJpaRepository extends JpaRepository<LectureEnr
                 WHERE e.lectureItemId = :lectureItemId
             """)
     List<LectureEnrollmentJpaEntity> findAllByLectureItemId(@Param("lectureItemId") final Long lectureItemId);
+
+
+    @Query("""
+                SELECT e
+                FROM LectureEnrollmentJpaEntity e
+                LEFT JOIN LectureItemJpaEntity i ON e.lectureItemId = i.id
+                WHERE i.lectureId = :lectureId AND e.userId = :userId
+            """)
+    Optional<LectureEnrollmentJpaEntity> findByLectureIdAndUserId(@Param("lectureId") final Long lectureId, @Param("userId") final Long userId);
+
 }

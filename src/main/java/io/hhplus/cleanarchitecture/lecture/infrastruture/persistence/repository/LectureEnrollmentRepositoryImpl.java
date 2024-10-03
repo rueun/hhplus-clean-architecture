@@ -37,8 +37,6 @@ public class LectureEnrollmentRepositoryImpl implements LectureEnrollmentReposit
 
     @Override
     public boolean existsByLectureIdAndUserId(final Long lectureId, final Long userId) {
-        return lectureEnrollmentJpaRepository.findAllByLectureId(lectureId)
-                .stream()
-                .anyMatch(lectureEnrollmentJpaEntity -> lectureEnrollmentJpaEntity.getUserId().equals(userId));
+        return lectureEnrollmentJpaRepository.findByLectureIdAndUserId(lectureId, userId).isPresent();
     }
 }

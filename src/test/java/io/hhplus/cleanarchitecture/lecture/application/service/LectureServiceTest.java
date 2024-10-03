@@ -163,28 +163,40 @@ class LectureServiceTest {
 
         LectureItem lectureItem1 = LectureItem.builder()
                 .lectureId(1L)
+                .lectureTime(LocalDateTime.parse("2024-10-10T10:00"))
                 .capacity(30)
                 .remainingCapacity(20)
                 .build();
 
         LectureItem lectureItem2 = LectureItem.builder()
                 .lectureId(1L)
+                .lectureTime(LocalDateTime.parse("2024-10-05T10:00"))
                 .capacity(30)
                 .remainingCapacity(0)
                 .build();
 
-        given(lectureRepository.getAvailableLectures(1L)).willReturn(List.of(lecture));
-        given(lectureRepository.getLectureItemMap(List.of(1L))).willReturn(Map.of(
-                1L, List.of(lectureItem1, lectureItem2)
+        LectureItem lectureItem3 = LectureItem.builder()
+                .lectureId(1L)
+                .lectureTime(LocalDateTime.parse("2024-10-01T10:00"))
+                .capacity(30)
+                .remainingCapacity(20)
+                .build();
+
+        given(timeProvider.now()).willReturn(LocalDateTime.parse("2024-10-01T10:00"));
+        given(lectureRepository.getAvailableLectures(anyLong())).willReturn(List.of(lecture));
+        given(lectureRepository.getLectureItemMap(anyList())).willReturn(Map.of(
+                1L, List.of(lectureItem1, lectureItem2, lectureItem3)
         ));
+
 
         // When
         List<LectureWithItems> availableLectures = lectureService.getAvailableLectures(1L);
 
         // Then
+        // 잔여 수량이 있고, 현재 시간보다 미래에 있는 강의만 가져와야 함
         assertAll(
                 () -> assertEquals(1, availableLectures.size()),
-                () -> assertEquals(1, availableLectures.get(0).getItems().size()), // 잔여 수량이 있는 강의 아이템만 포함되어야 함
+                () -> assertEquals(1, availableLectures.get(0).getItems().size()),
                 () -> assertThat(availableLectures.get(0).getItems()).extracting("lectureId", "capacity", "remainingCapacity")
                         .containsExactly(
                                 tuple(1L, 30, 20)
@@ -202,20 +214,20 @@ class LectureServiceTest {
 
         LectureItem lectureItem1 = LectureItem.builder()
                 .id(1L)
+                .lectureId(1L)
                 .lectureTime(LocalDateTime.parse("2024-10-10T10:00"))
                 .build();
         LectureItem lectureItem2 = LectureItem.builder()
                 .id(2L)
+                .lectureId(2L)
                 .lectureTime(LocalDateTime.parse("2024-10-05T10:00"))
                 .build();
 
         LectureEnrollment enrollment1 = LectureEnrollment.builder()
-                .lectureId(1L)
                 .lectureItemId(1L)
                 .enrolledAt(LocalDateTime.parse("2024-10-09T10:00"))
                 .build();
         LectureEnrollment enrollment2 = LectureEnrollment.builder()
-                .lectureId(2L)
                 .lectureItemId(2L)
                 .enrolledAt(LocalDateTime.parse("2024-10-04T10:00"))
                 .build();

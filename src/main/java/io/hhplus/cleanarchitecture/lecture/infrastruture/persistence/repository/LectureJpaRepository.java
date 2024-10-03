@@ -10,11 +10,15 @@ import java.util.List;
 public interface LectureJpaRepository extends JpaRepository<LectureJpaEntity, Long> {
 
     @Query(
-        """
-            SELECT l
-            FROM LectureJpaEntity l
-            LEFT JOIN LectureEnrollmentJpaEntity e ON l.id = e.lectureId AND e.userId = :userId
-            WHERE e.id IS NULL
-         """)
+            """
+                SELECT l
+                FROM LectureJpaEntity l
+                WHERE l.id NOT IN (
+                    SELECT i.lectureId
+                    FROM LectureItemJpaEntity i
+                    JOIN LectureEnrollmentJpaEntity e ON i.id = e.lectureItemId
+                    WHERE e.userId = :userId
+                )
+    """)
     List<LectureJpaEntity> findAvailableLectures(@Param("userId") Long userId);
 }
