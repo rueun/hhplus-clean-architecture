@@ -12,12 +12,9 @@ public interface LectureJpaRepository extends JpaRepository<LectureJpaEntity, Lo
     @Query(
         """
             SELECT l
-             FROM LectureJpaEntity l
-             WHERE l.id NOT IN (
-                 SELECT e.lectureId
-                 FROM LectureEnrollmentJpaEntity e
-                 WHERE e.userId = :userId
-             )
+            FROM LectureJpaEntity l
+            LEFT JOIN LectureEnrollmentJpaEntity e ON l.id = e.lectureId AND e.userId = :userId
+            WHERE e.id IS NULL
          """)
     List<LectureJpaEntity> findAvailableLectures(@Param("userId") Long userId);
 }

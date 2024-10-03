@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 
 import java.time.LocalDateTime;
@@ -17,7 +16,6 @@ import static org.assertj.core.api.BDDAssertions.then;
 import static org.assertj.core.api.BDDAssertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
-@ActiveProfiles("test")
 @DataJpaTest
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @TestPropertySource("classpath:/application-test.yml")
@@ -38,6 +36,7 @@ class LectureEnrollmentRepositoryImplTest {
         // Given
         LectureEnrollment lectureEnrollment = LectureEnrollment.builder()
                 .lectureId(1L)
+                .lectureItemId(1L)
                 .userId(1L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
                 .build();
@@ -49,6 +48,7 @@ class LectureEnrollmentRepositoryImplTest {
         assertAll(
                 () -> then(savedLectureEnrollment.getId()).isNotNull(),
                 () -> then(savedLectureEnrollment.getLectureId()).isEqualTo(1L),
+                () -> then(savedLectureEnrollment.getLectureItemId()).isEqualTo(1L),
                 () -> then(savedLectureEnrollment.getUserId()).isEqualTo(1L),
                 () -> then(savedLectureEnrollment.getEnrolledAt()).isEqualTo(LocalDateTime.parse("2024-10-01T10:00"))
         );
@@ -59,12 +59,14 @@ class LectureEnrollmentRepositoryImplTest {
         // Given
         LectureEnrollment lectureEnrollment1 = LectureEnrollment.builder()
                 .lectureId(1L)
+                .lectureItemId(1L)
                 .userId(1L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
                 .build();
 
         LectureEnrollment lectureEnrollment2 = LectureEnrollment.builder()
                 .lectureId(2L)
+                .lectureItemId(1L)
                 .userId(1L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
                 .build();
@@ -87,16 +89,53 @@ class LectureEnrollmentRepositoryImplTest {
     }
 
     @Test
+    void 특정한_특강항목의_수강신청_내역을_조회할_수_있다() {
+        // Given
+        LectureEnrollment lectureEnrollment1 = LectureEnrollment.builder()
+                .lectureId(1L)
+                .lectureItemId(1L)
+                .userId(1L)
+                .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
+                .build();
+
+        LectureEnrollment lectureEnrollment2 = LectureEnrollment.builder()
+                .lectureId(1L)
+                .lectureItemId(1L)
+                .userId(2L)
+                .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
+                .build();
+
+        lectureEnrollmentRepository.save(lectureEnrollment1);
+        lectureEnrollmentRepository.save(lectureEnrollment2);
+
+        // When
+        List<LectureEnrollment> lectureEnrollments = lectureEnrollmentRepository.findAllByLectureItemId(1L);
+
+        // Then
+        assertAll (
+                () -> then(lectureEnrollments.size()).isEqualTo(2),
+                () -> assertThat(lectureEnrollments).extracting("lectureId", "lectureItemId", "userId", "enrolledAt")
+                        .containsExactlyInAnyOrder(
+                                tuple(1L, 1L, 1L, LocalDateTime.parse("2024-10-01T10:00")),
+                                tuple(1L, 1L, 2L, LocalDateTime.parse("2024-10-01T10:00"))
+                        )
+        );
+    }
+
+
+    @Test
     void 유저가_특정_강의에_수강신청을_했는지_확인할_수_있다() {
         // Given
         LectureEnrollment lectureEnrollment1 = LectureEnrollment.builder()
                 .lectureId(1L)
+                .lectureItemId(1L)
                 .userId(1L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
                 .build();
 
         LectureEnrollment lectureEnrollment2 = LectureEnrollment.builder()
                 .lectureId(2L)
+                .lectureItemId(1L)
                 .userId(2L)
                 .enrolledAt(LocalDateTime.parse("2024-10-01T10:00"))
                 .build();

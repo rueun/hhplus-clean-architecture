@@ -14,7 +14,7 @@ public interface LectureItemJpaRepository extends JpaRepository<LectureItemJpaEn
 
     Optional<LectureItemJpaEntity> findByLectureIdAndId(Long lectureId, Long id);
 
-    List<LectureItemJpaEntity> findAllByLectureId(Long lectureId);
+    List<LectureItemJpaEntity> findAllByLectureIdIn(List<Long> lectureIds);
 
     @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""

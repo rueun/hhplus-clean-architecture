@@ -37,6 +37,7 @@ dependencies {
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	annotationProcessor('org.springframework.boot:spring-boot-configuration-processor')
+
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'com.h2database:h2'
 }
@@ -56,4 +57,5 @@ jar {
 tasks.test {
 	ignoreFailures = true
 	useJUnitPlatform()
+	systemProperties("spring.profiles.active": "test")
 }

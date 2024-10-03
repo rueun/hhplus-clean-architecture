@@ -17,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -90,15 +92,26 @@ public class LectureService {
      * @return 사용자가 신청한 모든 강의 목록
      */
     public List<LectureEnrollmentInfo> getUserLectureEnrollments(final Long userId) {
-        // 사용자의 모든 강의 신청 기록을 가져옴
         final List<LectureEnrollment> enrollments = lectureEnrollmentRepository.findAllByUserId(userId);
 
+        // 강의 ID와 강의 아이템 ID로 각각 강의와 강의 아이템을 조회
+        final List<Long> lectureIds = enrollments.stream().map(LectureEnrollment::getLectureId).toList();
+        final Map<Long, Lecture> lectureMap = lectureRepository.getByIds(lectureIds).stream()
+                .collect(Collectors.toMap(Lecture::getId, Function.identity()));
+
+        final List<Long> lectureItemIds = enrollments.stream().map(LectureEnrollment::getLectureItemId).toList();
+        final Map<Long, LectureItem> lectureItemMap = lectureRepository.getItemsByIds(lectureItemIds)
+                .stream()
+                .collect(Collectors.toMap(LectureItem::getId, Function.identity()));
+
+        // 강의, 강의 아이템, 수강신청 정보를 조합하여 반환
         return enrollments.stream()
                 .map(enrollment -> {
-                    final Lecture lecture = lectureRepository.getById(enrollment.getLectureId());
-                    final LectureItem item = lectureRepository.getItemById(enrollment.getLectureId(), enrollment.getLectureItemId());
-                    return LectureEnrollmentInfo.of(lecture, item, enrollment);
-                }).toList();
+                    final Lecture lecture = lectureMap.get(enrollment.getLectureId());
+                    final LectureItem lectureItem = lectureItemMap.get(enrollment.getLectureItemId());
+                    return LectureEnrollmentInfo.of(lecture, lectureItem, enrollment);
+                })
+                .toList();
     }
 
 }

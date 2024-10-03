@@ -69,6 +69,16 @@ public class LectureRepositoryImpl implements LectureRepository {
         return LectureItemMapper.toDomain(jpaEntity);
     }
 
+
+    @Override
+    public List<LectureItem> getItemsByIds(List<Long> lectureItemIds) {
+        List<LectureItemJpaEntity> jpaEntities = lectureItemJpaRepository.findAllById(lectureItemIds);
+        return jpaEntities.stream()
+                .map(LectureItemMapper::toDomain)
+                .toList();
+    }
+
+
     @Override
     public LectureItem getItemByIdWithPessimisticLock(final Long lectureId, final Long lectureItemId) {
         LectureItemJpaEntity jpaEntity = lectureItemJpaRepository.findByIdWithPessimisticLock(lectureId, lectureItemId)
@@ -79,18 +89,11 @@ public class LectureRepositoryImpl implements LectureRepository {
 
     @Override
     public Map<Long, List<LectureItem>> getLectureItemMap(final List<Long> lectureIds) {
-        List<LectureJpaEntity> lectureJpaEntities = lectureJpaRepository.findAllById(lectureIds);
+        List<LectureItemJpaEntity> lectureItemJpaEntities = lectureItemJpaRepository.findAllByLectureIdIn(lectureIds);
 
-        return lectureJpaEntities.stream()
-                .collect(Collectors.toMap(
-                        LectureJpaEntity::getId,
-                        lectureJpaEntity -> {
-                            List<LectureItemJpaEntity> lectureItemJpaEntities = lectureItemJpaRepository.findAllByLectureId(lectureJpaEntity.getId());
-                            return lectureItemJpaEntities.stream()
-                                    .map(LectureItemMapper::toDomain)
-                                    .toList();
-                        }
-                ));
+        return lectureItemJpaEntities.stream()
+                .map(LectureItemMapper::toDomain)
+                .collect(Collectors.groupingBy(LectureItem::getLectureId));
     }
 
     @Override
@@ -100,5 +103,4 @@ public class LectureRepositoryImpl implements LectureRepository {
                 .map(LectureMapper::toDomain)
                 .toList();
     }
-
 }
