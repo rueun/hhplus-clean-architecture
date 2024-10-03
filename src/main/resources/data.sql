@@ -4,9 +4,9 @@ INSERT INTO lecture (title, instructor) VALUES ('Spring Boot Introduction', 'Jan
 INSERT INTO lecture (title, instructor) VALUES ('React.js Basics', 'Alice Brown');
 
 -- lecture_item 테이블 초기 데이터
-INSERT INTO lecture_item (lecture_id, capacity, remaining_capacity, lecture_time) VALUES (1, 30, 30, '2024-10-10 10:00:00');
-INSERT INTO lecture_item (lecture_id, capacity, remaining_capacity, lecture_time) VALUES (1, 30, 30, '2024-10-10 14:00:00');
-INSERT INTO lecture_item (lecture_id, capacity, remaining_capacity, lecture_time) VALUES (1, 30, 30, '2024-10-11 10:00:00');
+INSERT INTO lecture_item (lecture_id, capacity, remaining_capacity, lecture_time) VALUES (1, 30, 30, '2024-10-03 10:00:00');
+INSERT INTO lecture_item (lecture_id, capacity, remaining_capacity, lecture_time) VALUES (1, 30, 30, '2024-10-05 14:00:00');
+INSERT INTO lecture_item (lecture_id, capacity, remaining_capacity, lecture_time) VALUES (1, 30, 30, '2024-10-07 10:00:00');
 INSERT INTO lecture_item (lecture_id, capacity, remaining_capacity, lecture_time) VALUES (1, 30, 30, '2024-10-11 14:00:00');
 
 INSERT INTO lecture_item (lecture_id, capacity, remaining_capacity, lecture_time) VALUES (2, 30, 30, '2024-10-10 10:00:00');
